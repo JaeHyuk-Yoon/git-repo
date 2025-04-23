@@ -39,4 +39,5 @@ public:
 	afx_msg void OnBnClickedBtnSetRadius();
 	int m_nCircleThick;
 	afx_msg void OnBnClickedBtnSetThickness();
+	afx_msg void OnBnClickedBtnReset();
 };

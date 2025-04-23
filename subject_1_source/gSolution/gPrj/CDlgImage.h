@@ -49,4 +49,5 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	int m_nUpdateIndex;
 	bool bKeepClick = false;
+	void resetProcess();
 };

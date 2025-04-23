@@ -158,6 +158,7 @@ void CDlgImage::updateDisplay(CPoint* p_ClickPointList, int nClickNum, int nCirc
 void CDlgImage::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	//cout << "Click Count : " << m_nClickNum << endl;
 	m_nClickNum++;
 
 	m_nBtnClickFlag = true;
@@ -328,7 +329,7 @@ void CDlgImage::OnMouseMove(UINT nFlags, CPoint point)
 
 	bool bCheckInCircle = false;
 
-	cout << "cursor : " << nCursorX << "," << nCursorY << endl;
+	//cout << "cursor : " << nCursorX << "," << nCursorY << endl;
 	
 	if (m_nClickNum > 3) {
 		//cout << "m_nClickNum : " << m_nClickNum << endl;
@@ -371,4 +372,15 @@ void CDlgImage::OnMouseMove(UINT nFlags, CPoint point)
 		}
 	}
 	CDialogEx::OnMouseMove(nFlags, point);
+}
+
+void CDlgImage::resetProcess()
+{
+	m_nClickNum = 0;
+
+	m_pClickPoint[0] = {};
+	m_pClickPoint[1] = {};
+	m_pClickPoint[2] = {};
+
+	bKeepClick = false;
 }

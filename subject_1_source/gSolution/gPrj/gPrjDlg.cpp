@@ -75,6 +75,7 @@ BEGIN_MESSAGE_MAP(CgPrjDlg, CDialogEx)
 	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_BTN_SET_RADIUS, &CgPrjDlg::OnBnClickedBtnSetRadius)
 	ON_BN_CLICKED(IDC_BTN_SET_THICKNESS, &CgPrjDlg::OnBnClickedBtnSetThickness)
+	ON_BN_CLICKED(IDC_BTN_RESET, &CgPrjDlg::OnBnClickedBtnReset)
 END_MESSAGE_MAP()
 
 
@@ -193,4 +194,17 @@ void CgPrjDlg::OnBnClickedBtnSetThickness()
 	cout << "Circle Thick Num : " << m_nCircleThick << endl;
 	cout << endl;
 	UpdateData(false);
+}
+
+
+void CgPrjDlg::OnBnClickedBtnReset()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	unsigned char* fm = (unsigned char*)m_pDlgImage->m_image.GetBits();
+	int nPitch = m_pDlgImage->m_image.GetPitch();
+
+	memset(fm, 0xff, NWIDTH * NHEIGHT);
+	m_pDlgImage->resetProcess();
+	m_pDlgImage->Invalidate();
+
 }
