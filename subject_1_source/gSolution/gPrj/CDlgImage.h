@@ -50,4 +50,6 @@ public:
 	int m_nUpdateIndex;
 	bool bKeepClick = false;
 	void resetProcess();
+	void randomProcess();
+	bool IsFiniteNumber(double x);
 };

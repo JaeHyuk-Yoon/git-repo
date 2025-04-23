@@ -76,6 +76,7 @@ BEGIN_MESSAGE_MAP(CgPrjDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_SET_RADIUS, &CgPrjDlg::OnBnClickedBtnSetRadius)
 	ON_BN_CLICKED(IDC_BTN_SET_THICKNESS, &CgPrjDlg::OnBnClickedBtnSetThickness)
 	ON_BN_CLICKED(IDC_BTN_RESET, &CgPrjDlg::OnBnClickedBtnReset)
+	ON_BN_CLICKED(IDC_BTN_RANDOM, &CgPrjDlg::OnBnClickedBtnRandom)
 END_MESSAGE_MAP()
 
 
@@ -207,4 +208,11 @@ void CgPrjDlg::OnBnClickedBtnReset()
 	m_pDlgImage->resetProcess();
 	m_pDlgImage->Invalidate();
 
+}
+
+
+void CgPrjDlg::OnBnClickedBtnRandom()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	m_pDlgImage->randomProcess();
 }

@@ -40,4 +40,5 @@ public:
 	int m_nCircleThick;
 	afx_msg void OnBnClickedBtnSetThickness();
 	afx_msg void OnBnClickedBtnReset();
+	afx_msg void OnBnClickedBtnRandom();
 };

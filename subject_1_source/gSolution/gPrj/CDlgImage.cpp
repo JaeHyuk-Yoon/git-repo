@@ -171,7 +171,7 @@ void CDlgImage::OnLButtonDown(UINT nFlags, CPoint point)
 	unsigned char* fm = (unsigned char*)m_image.GetBits();
 	
 	if (m_nClickNum < 3) {
-		cout << "--------------------------" << endl;
+		//cout << "--------------------------" << endl;
 		//cout << "Click Count : " << m_nClickNum << endl;
 
 		m_pClickPoint[m_nClickNum-1] = point;
@@ -195,12 +195,13 @@ void CDlgImage::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CDlgImage::drawBigCircle(unsigned char* fm, CPoint* p_ClickPointList, int thickness)
 {
+	int nPitch = m_image.GetPitch();
 	int nBlack = 0;
 	int nWhite = 0xff;
 	CPoint pBigCircleCenter;
 
 	double* bigCircleInfo = calcBigCircleInfo(p_ClickPointList);
-	if (bigCircleInfo[0] >= 0) {
+	if (bigCircleInfo[3] == 0) {
 		pBigCircleCenter.x = round(bigCircleInfo[0]);
 		pBigCircleCenter.y = round(bigCircleInfo[1]);
 		int nRadius = round(bigCircleInfo[2]);
@@ -208,8 +209,6 @@ void CDlgImage::drawBigCircle(unsigned char* fm, CPoint* p_ClickPointList, int t
 		int dHalfThickness = thickness / 2;
 
 		if (dHalfThickness == 0) dHalfThickness = 1;
-
-		int nPitch = m_image.GetPitch();
 
 		int nTopY = pBigCircleCenter.y - nRadius - dHalfThickness;
 		int nBottomY = pBigCircleCenter.y + nRadius + dHalfThickness;
@@ -263,11 +262,12 @@ void CDlgImage::drawThreeCircle(unsigned char* fm, CPoint* p_ClickPointList, int
 
 double* CDlgImage::calcBigCircleInfo(CPoint* p_ClickPointList)
 {
-	double static circleInfo[3];
+	double static circleInfo[4];
 
-	double dCenterX = -1;
+	double dCenterX = 0;
 	double dCenterY = 0;
 	double dRadius = 0;
+	double dParallelCheck = 0;
 	
 	CPoint interCenPt[2];
 
@@ -283,25 +283,60 @@ double* CDlgImage::calcBigCircleInfo(CPoint* p_ClickPointList)
 	interCenPt[0] = interCenFisrtPt;
 	interCenPt[1] = interCenSecendPt;
 
+	double b1=0;
+	double b2=0;
+
 	double a1 = -1.0 * (p_ClickPointList[0].x - p_ClickPointList[1].x) / (p_ClickPointList[0].y - p_ClickPointList[1].y);
-	double b1 = interCenPt[0].y - a1 * interCenPt[0].x;
+	//double b1 = interCenPt[0].y - a1 * interCenPt[0].x;
 
 	double a2 = -1.0 * (p_ClickPointList[0].x - p_ClickPointList[2].x) / (p_ClickPointList[0].y - p_ClickPointList[2].y);
-	double b2 = interCenPt[1].y - a2 * interCenPt[1].x;
+	//double b2 = interCenPt[1].y - a2 * interCenPt[1].x;
 
+	//cout << "a1 : " << a1 << endl;
+	//cout << "a2 : " << a2 << endl;
 
-	if (a1 != a2) {
-		dCenterX = (b2 - b1) / (a1 - a2);
-		dCenterY = a1 * dCenterX + b1;
-		dRadius = sqrt(pow(dCenterX - p_ClickPointList[0].x, 2) + pow(dCenterY - p_ClickPointList[0].y, 2));
+	if (!IsFiniteNumber(a1) && !IsFiniteNumber(a2)) {
+		if (a1 != a2) {
+			b1 = interCenPt[0].y - a1 * interCenPt[0].x;
+			b2 = interCenPt[1].y - a2 * interCenPt[1].x;
+
+			dCenterX = (b2 - b1) / (a1 - a2);
+			dCenterY = a1 * dCenterX + b1;
+		}
+		else {
+			dParallelCheck = 1;
+			//AfxMessageBox(_T("Can not make Circle (is not three points)"));
+		}
 	}
-	//else {
-		//AfxMessageBox(_T("Can not make Circle (is not three points)"));
-	//}
+	else {
+		if (IsFiniteNumber(a1) && !IsFiniteNumber(a2)) {
+			b2 = interCenPt[1].y - a2 * interCenPt[1].x;
+
+			dCenterX = interCenPt[0].x;
+			dCenterY = a2 * dCenterX + b2;
+		}
+		else if (!IsFiniteNumber(a1) && IsFiniteNumber(a2)) {
+			b1 = interCenPt[1].y - a1 * interCenPt[1].x;
+
+			dCenterX = interCenPt[1].x;
+			dCenterY = a1 * dCenterX + b1;
+		}
+		else {
+			dParallelCheck = 1;
+			//AfxMessageBox(_T("Can not make Circle (is not three points)"));
+		}
+	}
+
+	dRadius = sqrt(pow(dCenterX - p_ClickPointList[0].x, 2) + pow(dCenterY - p_ClickPointList[0].y, 2));
 	
 	circleInfo[0] = dCenterX;
 	circleInfo[1] = dCenterY;
 	circleInfo[2] = dRadius;
+	circleInfo[3] = dParallelCheck;
+
+	//cout << "================" << endl;
+	//cout << "circle = (" << circleInfo[0] << "," << circleInfo[1] << ") ----- " << circleInfo[2] << ") ----- " << circleInfo[3] << endl;
+	//cout << "================" << endl;
 	
 	return circleInfo;
 }
@@ -383,4 +418,35 @@ void CDlgImage::resetProcess()
 	m_pClickPoint[2] = {};
 
 	bKeepClick = false;
+}
+
+void CDlgImage::randomProcess()
+{
+	if (m_nClickNum >= 3) {
+		CgPrjDlg* pDlg = (CgPrjDlg*)GetParent();
+		int nRadius = pDlg->m_nRadiusNum;
+		int thickness = pDlg->m_nCircleThick;
+		unsigned char* fm = (unsigned char*)m_image.GetBits();
+
+		m_nClickNum = 3;
+
+		for (int i = 0; i < m_nClickNum; i++) {
+			m_pClickPoint[i].x = rand() % NWIDTH;
+			m_pClickPoint[i].y = rand() % NHEIGHT;
+			//cout << "m_pClickPoint[" << i << "] : (" << m_pClickPoint[i].x << "," << m_pClickPoint[i].y << ")" << endl;
+		}
+		memset(fm, 0xff, NWIDTH * NHEIGHT);
+
+		drawBigCircle(fm, m_pClickPoint, thickness);
+
+		drawThreeCircle(fm, m_pClickPoint, m_nClickNum, nRadius, nBlack);
+
+		updateDisplay(m_pClickPoint, m_nClickNum, nRadius);
+
+	}
+}
+
+bool CDlgImage::IsFiniteNumber(double x)
+{
+	return !(x <= DBL_MAX && x >= -DBL_MAX);
 }
