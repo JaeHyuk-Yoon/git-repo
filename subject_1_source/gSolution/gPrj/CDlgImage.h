@@ -44,4 +44,9 @@ public:
 	void drawThreeCircle(unsigned char* fm, CPoint* p_ClickPointList, int nClickNum, int nRadius, int nBlack);
 	int nBlack = 0;
 	double* calcBigCircleInfo(CPoint* p_ClickPointList);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	bool m_nBtnClickFlag = false;
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	int m_nUpdateIndex;
+	bool bKeepClick = false;
 };

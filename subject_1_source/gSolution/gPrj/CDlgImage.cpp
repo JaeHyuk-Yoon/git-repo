@@ -34,6 +34,8 @@ void CDlgImage::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CDlgImage, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
 END_MESSAGE_MAP()
 
 
@@ -46,7 +48,7 @@ BOOL CDlgImage::OnInitDialog()
 
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
 	//MoveWindow(0, 0, 640, 480);
-	MoveWindow(0, 0, 1280, 800);
+	//MoveWindow(0, 0, 1280, 800);
 	MoveWindow(0, 0, NWIDTH, NHEIGHT);
 	initImage();
 
@@ -97,8 +99,10 @@ void CDlgImage::drawCircle(unsigned char* fm, int x, int y, int nRadius, int nGr
 
 	for (int j = nCenterY-nRadius; j < nCenterY + nRadius * 2; j++) {
 		for (int i = nCenterX -nRadius; i < nCenterX + nRadius * 2; i++) {
-			if (isInCircle(i, j, nCenterX, nCenterY, nRadius))
-				fm[j * nPitch + i] = nGray;
+			if (isInCircle(i, j, nCenterX, nCenterY, nRadius)) {
+				if (validImgPos(i, j))
+					fm[j * nPitch + i] = nGray;
+			}
 		}
 	}
 }
@@ -129,11 +133,19 @@ void CDlgImage::updateDisplay(CPoint* p_ClickPointList, int nClickNum, int nCirc
 	CString strCenter;
 	int x;
 	int y;
+	int nTextNum;
 
 	CClientDC dc(this);
 	m_image.Draw(dc, 0, 0);
 
-	for (int i = 0; i < nClickNum; i++) {
+	if (nClickNum > 3) {
+		nTextNum = 3;
+	}
+	else {
+		nTextNum = nClickNum;
+	}
+
+	for (int i = 0; i < nTextNum; i++) {
 		x = p_ClickPointList[i].x;
 		y = p_ClickPointList[i].y;
 		strCenter.Format(_T("(%d, %d)"), x, y);
@@ -146,6 +158,9 @@ void CDlgImage::updateDisplay(CPoint* p_ClickPointList, int nClickNum, int nCirc
 void CDlgImage::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	m_nClickNum++;
+
+	m_nBtnClickFlag = true;
 
 	//CgPrjDlg* pDlg = (CgPrjDlg*)m_pParent;
 	CgPrjDlg* pDlg = (CgPrjDlg*)GetParent();
@@ -153,8 +168,6 @@ void CDlgImage::OnLButtonDown(UINT nFlags, CPoint point)
 	int thickness = pDlg->m_nCircleThick;
 
 	unsigned char* fm = (unsigned char*)m_image.GetBits();
-
-	m_nClickNum++;
 	
 	if (m_nClickNum < 3) {
 		cout << "--------------------------" << endl;
@@ -186,30 +199,44 @@ void CDlgImage::drawBigCircle(unsigned char* fm, CPoint* p_ClickPointList, int t
 	CPoint pBigCircleCenter;
 
 	double* bigCircleInfo = calcBigCircleInfo(p_ClickPointList);
+	if (bigCircleInfo[0] >= 0) {
+		pBigCircleCenter.x = round(bigCircleInfo[0]);
+		pBigCircleCenter.y = round(bigCircleInfo[1]);
+		int nRadius = round(bigCircleInfo[2]);
 
-	pBigCircleCenter.x = round(bigCircleInfo[0]);
-	pBigCircleCenter.y = round(bigCircleInfo[1]);
-	int nRadius = round(bigCircleInfo[2]);
+		int dHalfThickness = thickness / 2;
 
-	int dHalfThickness = thickness / 2;
+		if (dHalfThickness == 0) dHalfThickness = 1;
 
-	if (dHalfThickness == 0) dHalfThickness = 1;
+		int nPitch = m_image.GetPitch();
 
-	int nPitch = m_image.GetPitch();
+		int nTopY = pBigCircleCenter.y - nRadius - dHalfThickness;
+		int nBottomY = pBigCircleCenter.y + nRadius + dHalfThickness;
+		int nLeftX = pBigCircleCenter.x - nRadius - dHalfThickness;
+		int nRightX = pBigCircleCenter.x + nRadius + dHalfThickness;
 
-	for (int j = pBigCircleCenter.y - nRadius - dHalfThickness; j < pBigCircleCenter.y + nRadius * 2 + dHalfThickness; j++) {
-		for (int i = pBigCircleCenter.x - nRadius - dHalfThickness; i < pBigCircleCenter.x + nRadius * 2 + dHalfThickness; i++) {
-			if (isInCircle(i, j, pBigCircleCenter.x, pBigCircleCenter.y, nRadius + dHalfThickness))
-				fm[j * nPitch + i] = nBlack;
+		if (nTopY < 0) nTopY = 0;
+		if (nBottomY > NHEIGHT) nBottomY = NHEIGHT;
+		if (nLeftX < 0) nLeftX = 0;
+		if (nRightX < NWIDTH) nRightX = NWIDTH;
+
+		for (int j = nTopY; j < nBottomY; j++) {
+			for (int i = nLeftX; i < nRightX; i++) {
+				if (isInCircle(i, j, pBigCircleCenter.x, pBigCircleCenter.y, nRadius + dHalfThickness)) {
+					if (validImgPos(i, j))
+						fm[j * nPitch + i] = nBlack;
+				}
+			}
+		}
+		for (int j = nTopY; j < nBottomY; j++) {
+			for (int i = nLeftX; i < nRightX; i++) {
+				if (isInCircle(i, j, pBigCircleCenter.x, pBigCircleCenter.y, nRadius - dHalfThickness)) {
+					if (validImgPos(i, j))
+						fm[j * nPitch + i] = nWhite;
+				}
+			}
 		}
 	}
-	for (int j = pBigCircleCenter.y - nRadius; j < pBigCircleCenter.y + nRadius * 2; j++) {
-		for (int i = pBigCircleCenter.x - nRadius; i < pBigCircleCenter.x + nRadius * 2; i++) {
-			if (isInCircle(i, j, pBigCircleCenter.x, pBigCircleCenter.y, nRadius - dHalfThickness))
-				fm[j * nPitch + i] = nWhite;
-		}
-	}
-	
 }
 
 void CDlgImage::drawThreeCircle(unsigned char* fm, CPoint* p_ClickPointList, int nClickNum, int nRadius, int nBlack)
@@ -224,8 +251,10 @@ void CDlgImage::drawThreeCircle(unsigned char* fm, CPoint* p_ClickPointList, int
 
 		for (int j = nCenterY - nRadius; j < nCenterY + nRadius * 2; j++) {
 			for (int i = nCenterX - nRadius; i < nCenterX + nRadius * 2; i++) {
-				if (isInCircle(i, j, nCenterX, nCenterY, nRadius))
-					fm[j * nPitch + i] = nBlack;
+				if (isInCircle(i, j, nCenterX, nCenterY, nRadius)) {
+					if (validImgPos(i, j))
+						fm[j * nPitch + i] = nBlack;
+				}
 			}
 		}
 	}	
@@ -235,7 +264,7 @@ double* CDlgImage::calcBigCircleInfo(CPoint* p_ClickPointList)
 {
 	double static circleInfo[3];
 
-	double dCenterX = 0;
+	double dCenterX = -1;
 	double dCenterY = 0;
 	double dRadius = 0;
 	
@@ -265,13 +294,81 @@ double* CDlgImage::calcBigCircleInfo(CPoint* p_ClickPointList)
 		dCenterY = a1 * dCenterX + b1;
 		dRadius = sqrt(pow(dCenterX - p_ClickPointList[0].x, 2) + pow(dCenterY - p_ClickPointList[0].y, 2));
 	}
-	else {
-		AfxMessageBox(_T("Can not make Circle (is not three points)"));
-	}
+	//else {
+		//AfxMessageBox(_T("Can not make Circle (is not three points)"));
+	//}
 	
 	circleInfo[0] = dCenterX;
 	circleInfo[1] = dCenterY;
 	circleInfo[2] = dRadius;
 	
 	return circleInfo;
+}
+
+void CDlgImage::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	m_nBtnClickFlag = false;
+	CDialogEx::OnLButtonUp(nFlags, point);
+}
+
+
+void CDlgImage::OnMouseMove(UINT nFlags, CPoint point)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	CgPrjDlg* pDlg = (CgPrjDlg*)GetParent();
+	int nRadius = pDlg->m_nRadiusNum;
+	int thickness = pDlg->m_nCircleThick;
+	unsigned char* fm = (unsigned char*)m_image.GetBits();
+
+	CPoint tmpPt;
+
+	int nCursorX = point.x;
+	int nCursorY = point.y;
+
+	bool bCheckInCircle = false;
+
+	cout << "cursor : " << nCursorX << "," << nCursorY << endl;
+	
+	if (m_nClickNum > 3) {
+		//cout << "m_nClickNum : " << m_nClickNum << endl;
+		if (m_nBtnClickFlag) {
+			//cout << "In m_nBtnClickFlag !!! : " << m_nBtnClickFlag << endl;
+			if (!bKeepClick) {
+				for (int i = 0; i < 3; i++) {
+					if (isInCircle(nCursorX, nCursorY, m_pClickPoint[i].x, m_pClickPoint[i].y, nRadius)) {
+						bKeepClick = true;
+						bCheckInCircle = true;
+						m_nUpdateIndex = i;
+						tmpPt.x = nCursorX;
+						tmpPt.y = nCursorY;
+						m_pClickPoint[m_nUpdateIndex] = tmpPt;
+						//cout << "m_pClickPoint[nUpdateIndex] : " << m_pClickPoint[m_nUpdateIndex].x << "," << m_pClickPoint[m_nUpdateIndex].y << endl;
+					}
+				}
+			}
+			else {
+				tmpPt.x = nCursorX;
+				tmpPt.y = nCursorY;
+				m_pClickPoint[m_nUpdateIndex] = tmpPt;
+				bCheckInCircle = true;
+			}
+
+			if (bCheckInCircle) {
+				//cout << "m_pClickPoint[nUpdateIndex] : " << m_pClickPoint[m_nUpdateIndex].x << "," << m_pClickPoint[m_nUpdateIndex].y << endl;
+
+				memset(fm, 0xff, NWIDTH * NHEIGHT);
+
+				drawBigCircle(fm, m_pClickPoint, thickness);
+
+				drawThreeCircle(fm, m_pClickPoint, m_nClickNum, nRadius, nBlack);
+
+				updateDisplay(m_pClickPoint, m_nClickNum, nRadius);
+			}
+		}
+		else {
+			bKeepClick = false;
+		}
+	}
+	CDialogEx::OnMouseMove(nFlags, point);
 }
