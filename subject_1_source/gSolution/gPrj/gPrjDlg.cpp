@@ -7,7 +7,6 @@
 #include "gPrj.h"
 #include "gPrjDlg.h"
 #include "afxdialogex.h"
-#include <iostream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -77,6 +76,7 @@ BEGIN_MESSAGE_MAP(CgPrjDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_SET_THICKNESS, &CgPrjDlg::OnBnClickedBtnSetThickness)
 	ON_BN_CLICKED(IDC_BTN_RESET, &CgPrjDlg::OnBnClickedBtnReset)
 	ON_BN_CLICKED(IDC_BTN_RANDOM, &CgPrjDlg::OnBnClickedBtnRandom)
+	ON_BN_CLICKED(IDC_BTN_RANDOM_LOOP, &CgPrjDlg::OnBnClickedBtnRandomLoop)
 END_MESSAGE_MAP()
 
 
@@ -182,32 +182,30 @@ void CgPrjDlg::OnDestroy()
 	if (m_pDlgImage)		delete m_pDlgImage;
 }
 
+// 반지름 설정 버튼 이벤트
 void CgPrjDlg::OnBnClickedBtnSetRadius()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	// 반지름 설정
 	// 데이터 갱신
 	UpdateData(TRUE);
 	// 갱신된 데이터 화면에 업데이트
 	UpdateData(false);
 }
 
-
+// 정원 두께 설정 버튼 이벤트
 void CgPrjDlg::OnBnClickedBtnSetThickness()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	// 정원 두께 설정
 	// 데이터 갱신
 	UpdateData(TRUE);
 	// 갱신된 데이터 화면에 업데이트
 	UpdateData(false);
 }
 
-
+// 초기화 버튼
 void CgPrjDlg::OnBnClickedBtnReset()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	// 초기화 버튼
 	unsigned char* fm = (unsigned char*)m_pDlgImage->m_image.GetBits();
 	int nPitch = m_pDlgImage->m_image.GetPitch();
 
@@ -218,9 +216,16 @@ void CgPrjDlg::OnBnClickedBtnReset()
 
 }
 
-
+// 랜덤 이동 버튼
 void CgPrjDlg::OnBnClickedBtnRandom()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_pDlgImage->randomProcess();
+}
+
+// 랜덤 이동 10회 반복 버튼
+void CgPrjDlg::OnBnClickedBtnRandomLoop()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	m_pDlgImage->randomLoopThreadProcess();
 }

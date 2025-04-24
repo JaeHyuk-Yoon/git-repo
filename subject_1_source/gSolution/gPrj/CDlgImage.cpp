@@ -5,7 +5,6 @@
 #include "gPrj.h"
 #include "afxdialogex.h"
 #include "CDlgImage.h"
-#include <iostream>
 #include "gPrjDlg.h"
 
 
@@ -469,8 +468,60 @@ void CDlgImage::randomProcess()
 	}
 }
 
+void CDlgImage::randomProcess(int nRadius, int nThickness)
+{
+	// 랜덤 이동
+	if (m_nClickNum >= 3) {
+		CgPrjDlg* pDlg = (CgPrjDlg*)GetParent();
+		int radius = nRadius;
+		int thickness = nThickness;
+		unsigned char* fm = (unsigned char*)m_image.GetBits();
+
+		m_nClickNum = 3;
+
+		// 랜덤 좌표 3개 생성 후 클릭 좌표 리스트 업데이트
+		for (int i = 0; i < m_nClickNum; i++) {
+			m_pClickPoint[i].x = rand() % NWIDTH;
+			m_pClickPoint[i].y = rand() % NHEIGHT;
+		}
+		memset(fm, 0xff, NWIDTH * NHEIGHT);
+
+		// 랜덤 좌표로 업데이트 된 클릭 좌표 리스트로 정원 그리기
+		drawBigCircle(fm, m_pClickPoint, thickness);
+
+		// 랜덤 좌표로 업데이트 된 클릭 좌표의 원 3개 그리기
+		drawThreeCircle(fm, m_pClickPoint, m_nClickNum, radius, nBlack);
+
+		updateDisplay(m_pClickPoint, m_nClickNum, radius);
+	}
+}
+
 // inf 인지 확인 함수
 bool CDlgImage::IsFiniteNumber(double x)
 {
 	return !(x <= DBL_MAX && x >= -DBL_MAX);
+}
+
+// Thread 함수
+void threadProcess(CWnd* pParent, int nRadius, int nThickness) {
+	CDlgImage* pWnd = (CDlgImage*)pParent;
+	int nLoopNum = 10;
+
+	for (int i = 0; i < nLoopNum; i++) {
+		pWnd->randomProcess(nRadius, nThickness);
+		Sleep(500);
+	}
+}
+
+// 랜덤 이동 10회 반복 함수
+void CDlgImage::randomLoopThreadProcess()
+{
+	if (m_nClickNum >= 3) {
+		CgPrjDlg* pDlg = (CgPrjDlg*)GetParent();
+		int nRadius = pDlg->m_nRadiusNum;
+		int nThickness = pDlg->m_nCircleThick;
+
+		thread _thread0(threadProcess, this, nRadius, nThickness);
+		_thread0.detach();
+	}
 }

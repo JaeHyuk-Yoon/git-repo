@@ -2,8 +2,9 @@
 // gPrjDlg.h: 헤더 파일
 //
 #include "CDlgImage.h"
-#pragma once
+#include <iostream>
 
+#pragma once
 
 // CgPrjDlg 대화 상자
 class CgPrjDlg : public CDialogEx
@@ -41,4 +42,5 @@ public:
 	afx_msg void OnBnClickedBtnSetThickness();
 	afx_msg void OnBnClickedBtnReset();
 	afx_msg void OnBnClickedBtnRandom();
+	afx_msg void OnBnClickedBtnRandomLoop();
 };

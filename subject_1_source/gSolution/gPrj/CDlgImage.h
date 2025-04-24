@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "afxdialogex.h"
 #include <cmath>
+#include <iostream>
+#include <thread>
 
 
 // CDlgImage 대화 상자
@@ -51,5 +53,7 @@ public:
 	bool bKeepClick = false;
 	void resetProcess();
 	void randomProcess();
+	void randomProcess(int nRadius, int nThickness);
 	bool IsFiniteNumber(double x);
+	void randomLoopThreadProcess();
 };
