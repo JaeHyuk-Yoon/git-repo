@@ -112,7 +112,11 @@ BOOL CgPrjDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+
+	// 메인 다이얼로그 크기 설정
 	MoveWindow(0, 0, NWIDTH, NHEIGHT+100);
+
+	// 자식 다이얼로그 생성 및 설정
 	m_pDlgImage = new CDlgImage;
 	m_pDlgImage->Create(IDD_CDlgImage, this);
 	m_pDlgImage->ShowWindow(SW_SHOW);
@@ -181,9 +185,10 @@ void CgPrjDlg::OnDestroy()
 void CgPrjDlg::OnBnClickedBtnSetRadius()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	// 반지름 설정
+	// 데이터 갱신
 	UpdateData(TRUE);
-	cout << "Radius Num : " << m_nRadiusNum << endl;
-	cout << endl;
+	// 갱신된 데이터 화면에 업데이트
 	UpdateData(false);
 }
 
@@ -191,9 +196,10 @@ void CgPrjDlg::OnBnClickedBtnSetRadius()
 void CgPrjDlg::OnBnClickedBtnSetThickness()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	// 정원 두께 설정
+	// 데이터 갱신
 	UpdateData(TRUE);
-	cout << "Circle Thick Num : " << m_nCircleThick << endl;
-	cout << endl;
+	// 갱신된 데이터 화면에 업데이트
 	UpdateData(false);
 }
 
@@ -201,10 +207,12 @@ void CgPrjDlg::OnBnClickedBtnSetThickness()
 void CgPrjDlg::OnBnClickedBtnReset()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	// 초기화 버튼
 	unsigned char* fm = (unsigned char*)m_pDlgImage->m_image.GetBits();
 	int nPitch = m_pDlgImage->m_image.GetPitch();
 
 	memset(fm, 0xff, NWIDTH * NHEIGHT);
+	// 자식 클래스 멤버 변수 초기화 함수 호출
 	m_pDlgImage->resetProcess();
 	m_pDlgImage->Invalidate();
 
