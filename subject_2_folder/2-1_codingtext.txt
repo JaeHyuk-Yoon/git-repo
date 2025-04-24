@@ -1,0 +1,15 @@
+#include <string>
+#include <vector>
+
+using namespace std;
+
+int solution(int n, int k) {
+    int answer = 0;
+    
+    int nLambPrice = 12000;
+    int nJuicePrice = 2000;
+    
+    answer = n*nLambPrice + k*nJuicePrice - (n/10)*(nJuicePrice);
+    
+    return answer;
+}
